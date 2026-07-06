@@ -1,0 +1,8 @@
+# Plaintext corpus — contains real (de-identified) participant dialogue text.
+# NEVER commit these to a public repo. Only the encrypted *.enc.json files
+# (produced by tools/encrypt_data.js) are safe to publish.
+data/manifest.json
+data/S1_dialogues.json
+data/S2_dialogues.json
+
+.DS_Store
