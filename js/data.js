@@ -7,7 +7,7 @@ const Data = (() => {
   const studies = {};        // key -> {dialogues:[...], byId:{...}}
 
   async function fetchEncrypted(path) {
-    const r = await fetch(path);
+    const r = await fetch(path, { cache: "no-store" });
     if (!r.ok) throw new Error(`${path} not found — run tools/build_data.py then tools/encrypt_data.js`);
     const payload = await r.json();
     const text = await CryptoUtil.decryptWithKey(payload, Auth.getKey());

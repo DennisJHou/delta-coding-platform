@@ -14,7 +14,7 @@ const Auth = (() => {
 
   async function fetchManifestPayload() {
     if (manifestPayload) return manifestPayload;
-    const r = await fetch("data/manifest.enc.json");
+    const r = await fetch("data/manifest.enc.json", { cache: "no-store" });
     if (!r.ok) throw new Error("data/manifest.enc.json not found — run tools/encrypt_data.js");
     manifestPayload = await r.json();
     return manifestPayload;

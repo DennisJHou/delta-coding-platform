@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Coding Book：情緒調節策略與同理心 — 人機對話標註平台</title>
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  .cb-wrap { max-width: 1040px; margin: 0 auto; padding: 24px 24px 80px; }
+  .cb-header { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; flex-wrap: wrap; }
+  .cb-back { text-decoration: none; }
+  .cb-title { font-size: 22px; font-weight: 800; margin: 0; }
+  .cb-sub { color: var(--muted); font-size: 13px; margin: 4px 0 22px; }
+  .cb-toc { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 28px; }
+  .cb-toc a {
+    font-size: 12px; font-weight: 700; color: var(--brand); background: #fff;
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; text-decoration: none;
+  }
+  .cb-toc a:hover { border-color: var(--brand); background: #fbe9d7; }
+  .cb-section { margin-bottom: 38px; }
+  .cb-section-title {
+    font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--muted); border-bottom: 2px solid var(--line); padding-bottom: 8px; margin: 0 0 6px;
+  }
+  .cb-section-note { font-size: 12.5px; color: var(--muted); margin: 0 0 16px; }
+
+  /* decision tree */
+  .cb-flow {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 20px;
+  }
+  .cb-flow-title { font-weight: 800; font-size: 13.5px; margin-bottom: 10px; }
+  .cb-flow-step {
+    display: flex; gap: 10px; align-items: flex-start; padding: 8px 0;
+    border-top: 1px dashed var(--line);
+  }
+  .cb-flow-step:first-of-type { border-top: none; }
+  .cb-flow-q { font-weight: 700; font-size: 13px; min-width: 26px; color: var(--brand); }
+  .cb-flow-body { font-size: 13px; line-height: 1.6; }
+  .cb-flow-body b { color: var(--ink); }
+  .cb-flow-body .arrow { color: var(--muted); font-weight: 700; }
+
+  /* item card */
+  .cb-item {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 16px;
+  }
+  .cb-item-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .cb-no {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px;
+    border-radius: 6px; background: var(--brand); color: #fff; font-size: 12px; font-weight: 800;
+  }
+  .cb-name-zh { font-size: 16px; font-weight: 800; }
+  .cb-name-en { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .cb-def { font-size: 13.5px; line-height: 1.65; margin: 0 0 6px; }
+  .cb-cue { font-size: 12.5px; line-height: 1.6; margin: 0 0 10px; background: #fbe9d7; border-radius: 6px; padding: 6px 10px; }
+  .cb-cue b { color: var(--brand); }
+
+  .cb-examples { border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 4px; }
+  .cb-ex-label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; }
+  .cb-ex-row { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; }
+  .cb-ex-tag {
+    flex: 0 0 auto; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-top: 1px;
+  }
+  .cb-ex-tag.yes { background: #eef3df; color: var(--good); }
+  .cb-ex-tag.no { background: #fbe2dd; color: var(--low); }
+  .cb-ex-text { font-size: 13px; line-height: 1.6; }
+  .cb-ex-why { font-size: 11.5px; color: var(--muted); margin-top: 2px; font-style: italic; }
+
+  .cb-badge { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
+  .cb-badge.neg { background: #f9dcd7; color: var(--b); }
+  .cb-badge.pos { background: #eef3df; color: var(--good); }
+  .cb-badge.cog { background: #dfe7f7; color: #1e3a8a; }
+  .cb-badge.aff { background: #f7dfe7; color: #9d174d; }
+  .cb-badge.mot { background: #fbe9d7; color: var(--brand); }
+
+  /* confusable pairs */
+  .cb-confuse-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .cb-confuse-table th, .cb-confuse-table td { border: 1px solid var(--line); padding: 10px 12px; font-size: 13px; text-align: left; vertical-align: top; }
+  .cb-confuse-table th { background: var(--line2); font-size: 11.5px; text-transform: uppercase; color: var(--muted); }
+  .cb-confuse-table td.k { font-weight: 700; white-space: nowrap; color: var(--brand); }
+  .cb-confuse-table .rule { background: #fffaf0; }
+
+  .cb-empathy-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .cb-empathy-table th, .cb-empathy-table td { border: 1px solid var(--line); padding: 8px 10px; font-size: 12.5px; text-align: left; vertical-align: top; }
+  .cb-empathy-table th { background: var(--line2); font-size: 11px; text-transform: uppercase; color: var(--muted); }
+  .cb-empathy-table td.code { font-weight: 700; white-space: nowrap; color: var(--brand); }
+  .cb-reverse { font-size: 11px; color: var(--low); font-weight: 700; margin-left: 6px; }
+  .cb-attn { font-size: 11px; color: var(--muted); font-style: italic; margin-left: 6px; }
+</style>
+</head>
+<body>
+<div class="cb-wrap">
+
+  <div class="cb-header">
+    <a class="cb-back btn small" href="index.html">← 回標註平台</a>
+  </div>
+  <h1 class="cb-title">Coding Book：情緒調節策略與同理心</h1>
+  <p class="cb-sub">人機對話標註平台 · 標註員操作指南 — 看到什麼樣的句子、要打什麼樣的標籤 · 對應 <code>js/config.js</code> 中的正式編碼架構</p>
+
+  <div class="cb-toc">
+    <a href="#howto">如何使用本手冊</a>
+    <a href="#flow">判斷流程</a>
+    <a href="#neg">① 負向情緒調節策略</a>
+    <a href="#pos">② 正向情緒調節策略</a>
+    <a href="#confuse">易混淆項目對照</a>
+    <a href="#empathy">③ 同理心類型</a>
+  </div>
+
+  <!-- ============================================================= -->
+  <section class="cb-section" id="howto">
+    <h2 class="cb-section-title">如何使用本手冊</h2>
+    <p class="cb-def">標註單位是「一則 AI 回覆」（對應使用者的上一句話）。每一則回覆要做兩件事：</p>
+    <div class="cb-flow">
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">1</div>
+        <div class="cb-flow-body"><b>情緒調節策略</b>（可複選 1–3 項）— 這則回覆「做了什麼事」來調節使用者的情緒？先看使用者這句話的情緒是負向還是正向，決定去負向策略區（① 情境選擇～壓抑）還是正向策略區（② 抑制／品味）找，再逐條核對「觸發線索」。</div>
+      </div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">2</div>
+        <div class="cb-flow-body"><b>同理心類型</b>（單選 1 項）— 這則回覆「主要展現哪一種同理」？認知（理解你的想法）／情感（跟你一起感受）／動機（想幫你）三選一，選「最主要、最明顯」的那一種，不是全部都選。</div>
+      </div>
+    </div>
+    <p class="cb-def">每個項目底下都附有「✅ 符合範例」與「❌ 不符合／常見誤判範例」的真實對話片段（改寫自 Study 1 / Study 2 語料），以及一句話的「判斷口訣」。遇到不確定的回覆，先讀口訣，再對照易混淆項目對照表（見下方）。</p>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="cb-section" id="flow">
+    <h2 class="cb-section-title">判斷流程 — 情緒調節策略</h2>
+    <p class="cb-section-note">從上到下逐步問自己，符合就勾選、繼續往下看是否還有其他策略也符合（可複選）。</p>
+    <div class="cb-flow">
+      <div class="cb-flow-title">Step 0　先定情緒方向</div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q0</div>
+        <div class="cb-flow-body">使用者這句話的情緒整體是負向／中性，還是正向？ <span class="arrow">→</span> 負向或中性走 <b>①負向策略區</b>；正向走 <b>②正向策略區</b>。（同一則回覆通常只會落在其中一區，除非使用者情緒本身混雜。）</div>
+      </div>
+    </div>
+    <div class="cb-flow">
+      <div class="cb-flow-title">Step 1　負向策略區（依 Gross 歷程模型，由「事前」到「事後」）</div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q1</div>
+        <div class="cb-flow-body">AI 是否建議「避開、遠離」某個情境或人？ <span class="arrow">→</span> 是 <b>情境選擇</b>。</div>
+      </div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q2</div>
+        <div class="cb-flow-body">AI 是否提出「具體行動」去改變或解決那個外部問題本身（不是只換個心態）？ <span class="arrow">→</span> 是 <b>情境修改</b>。</div>
+      </div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q3</div>
+        <div class="cb-flow-body">AI 是否試圖把使用者的「注意力」引開到別的、無關的事情上（例如聊點開心的事）？ <span class="arrow">→</span> 是 <b>注意力分散</b>。</div>
+      </div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q4</div>
+        <div class="cb-flow-body">AI 是否引導使用者「換個角度／換個意義」重新看待同一件事（問題本身沒變，但詮釋變了）？ <span class="arrow">→</span> 是 <b>認知重評</b>。</div>
+      </div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q5</div>
+        <div class="cb-flow-body">AI 是否鼓勵使用者「說出來、寫下來」表達情緒？ <span class="arrow">→</span> 是 <b>表達</b>。</div>
+      </div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q6</div>
+        <div class="cb-flow-body">AI 是否建議使用者「忍住、不要表現出來、收斂情緒」？ <span class="arrow">→</span> 是 <b>壓抑</b>。</div>
+      </div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q7</div>
+        <div class="cb-flow-body">以上皆非，且此回覆只是問候／事務性對話／單純安慰沒有具體策略？ <span class="arrow">→</span> <b>無／不適用</b>。</div>
+      </div>
+    </div>
+    <div class="cb-flow">
+      <div class="cb-flow-title">Step 2　正向策略區</div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q8</div>
+        <div class="cb-flow-body">AI 是否指出這件開心事「可能的隱憂／潑冷水／叫使用者收斂表現」？ <span class="arrow">→</span> 是 <b>抑制（淡化）</b>。</div>
+      </div>
+      <div class="cb-flow-step">
+        <div class="cb-flow-q">Q9</div>
+        <div class="cb-flow-body">AI 是否一起慶祝、延續、放大這份好心情？ <span class="arrow">→</span> 是 <b>品味</b>。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="cb-section" id="neg">
+    <h2 class="cb-section-title">① 負向情緒調節策略 Negative Emotion-Regulation Strategies</h2>
+    <p class="cb-section-note">依據 Gross 情緒調節歷程模型（情境 → 注意力 → 評估 → 反應）。標註單位為「一則 AI 回覆」，可複選——若一則回覆同時安撫又重新框架，兩者皆勾選。</p>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">1</span>
+        <span class="cb-name-zh">情境選擇</span>
+        <span class="cb-name-en">Situation Selection</span>
+        <span class="cb-badge neg">負向策略</span>
+      </div>
+      <p class="cb-def">幫助伴侶避開預期會引發負面情緒的情境，包括人、地點、任務等外在刺激。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>句子核心動詞是「避開／遠離／不要接觸」——重點在「躲開情境」，而不是「改變情境」。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「或許你可以先暫時避開跟哥哥住同一個屋簷下的場合，減少直接衝突的機會。」</div>
+          <div class="cb-ex-why">具體建議「避開」某個會引發情緒的情境（同住場合）。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合</span>
+          <div><div class="cb-ex-text">「你可以試著跟哥哥好好溝通，說明你的界線在哪裡。」</div>
+          <div class="cb-ex-why">這是「面對並改變」情境（溝通、談判），屬於情境修改，不是迴避。</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">2</span>
+        <span class="cb-name-zh">情境修改</span>
+        <span class="cb-name-en">Situation Modification</span>
+        <span class="cb-badge neg">負向策略</span>
+      </div>
+      <p class="cb-def">建議伴侶改變、移除或調整當前或預期情境的某些面向，以降低其情緒衝擊。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>句子提出「具體可執行的行動方案」去解決/調整外部問題本身——不是只換想法，是真的要做點什麼改變現實。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「你可以考慮寫一封信給家人，清楚說明自己的界線與底線，讓他們知道你的需求。」</div>
+          <div class="cb-ex-why">提出具體行動（寫信、表達界線）改變現實情境，而非只是重新詮釋。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合</span>
+          <div><div class="cb-ex-text">「你已經在諮商中更認識自己，這本身就是一種成長。」</div>
+          <div class="cb-ex-why">只是肯定既有的認知/情緒收穫，沒有提出改變外部情境的具體行動 → 較接近反應調節／認知重評，不算情境修改。</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">3</span>
+        <span class="cb-name-zh">注意力分散</span>
+        <span class="cb-name-en">Distraction</span>
+        <span class="cb-badge neg">負向策略</span>
+      </div>
+      <p class="cb-def">嘗試將伴侶的注意力從引發情緒反應的情境元素上移開，屬於注意力部署的一種形式。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>AI 主動「換話題」到一件和問題「無關」的開心／中性事物上，而不是繼續談這個問題（哪怕是正面地談）。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「先不聊這個了，你最近有沒有發現什麼讓你開心的小事？我們聊聊那個吧。」</div>
+          <div class="cb-ex-why">明確把話題從困擾轉移到無關的開心小事上。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合</span>
+          <div><div class="cb-ex-text">「這件事情確實讓人很有壓力，我們可以換個角度想想看有沒有轉機。」</div>
+          <div class="cb-ex-why">仍在談同一件事，只是要求「換角度」，屬於認知重評，不是轉移話題。</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">4</span>
+        <span class="cb-name-zh">認知重評</span>
+        <span class="cb-name-en">Cognitive Reappraisal</span>
+        <span class="cb-badge neg">負向策略</span>
+      </div>
+      <p class="cb-def">幫助伴侶重新詮釋引發情緒的情境，以改變其情緒影響；例如引導伴侶從不同角度看待問題。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>問題「本身沒有改變」，但 AI 提供了「新的解釋／新的意義框架」，讓使用者對同一件事有不同的感受。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「你當時的拒絕其實是基於當下最理性的判斷，不完全怪他，這也顯示你具備很高的情感智慧。」</div>
+          <div class="cb-ex-why">把「拒絕」重新框架為「理性、成熟」的行為，改變了對同一件事的意義詮釋。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合</span>
+          <div><div class="cb-ex-text">「聽起來你真的經歷了很大的情緒衝擊，我可以理解你為什麼會那麼生氣。」</div>
+          <div class="cb-ex-why">這是單純的情緒認可（validation）與同理，沒有提供「新的詮釋角度」，容易誤判為認知重評——實際上只是反應調節/情感同理。</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">5</span>
+        <span class="cb-name-zh">表達</span>
+        <span class="cb-name-en">Expression</span>
+        <span class="cb-badge neg">負向策略</span>
+      </div>
+      <p class="cb-def">鼓勵伴侶以語言、書寫或行為來表達其情緒狀態。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>AI 鼓勵「說出來／寫下來」情緒本身，而不是鼓勵「做某件事解決問題」。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「或許可以找信任的朋友談談你的感受，或者寫日記把情緒梳理出來。」</div>
+          <div class="cb-ex-why">鼓勵透過談話／書寫來抒發情緒本身。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合</span>
+          <div><div class="cb-ex-text">「你可以寫一封信給爸媽，清楚說明你的界線在哪裡。」</div>
+          <div class="cb-ex-why">雖然也是「寫」，但目的是解決外部問題（劃界線），屬於情境修改，不是單純情緒表達。</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">6</span>
+        <span class="cb-name-zh">壓抑</span>
+        <span class="cb-name-en">Suppression</span>
+        <span class="cb-badge neg">負向策略</span>
+      </div>
+      <p class="cb-def">建議伴侶壓制或收斂其負面情緒的外在行為表現。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>AI 建議使用者「忍住、別表現出來、先冷處理」——這在支持型對話中極少見，出現時通常很明顯（且常被視為較負面的介入方式）。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「這種場合，或許先不要把情緒表現得太明顯，忍一忍，之後再私下處理會比較好。」</div>
+          <div class="cb-ex-why">明確建議收斂、不表現出情緒。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合</span>
+          <div><div class="cb-ex-text">「你願意把情緒說出來、不再委屈自己，這已經是很負責任的一步。」</div>
+          <div class="cb-ex-why">方向相反——這是鼓勵「表達」而非壓抑，別因為都提到「情緒」就混淆。</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="cb-section" id="pos">
+    <h2 class="cb-section-title">② 正向情緒調節策略 Positive Emotion-Regulation Strategies</h2>
+    <p class="cb-section-note">針對伴侶「正向」情緒的調節——延續放大，或抑制淡化。僅適用於使用者當下情緒偏正向時。</p>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">7</span>
+        <span class="cb-name-zh">抑制（淡化）</span>
+        <span class="cb-name-en">Dampening</span>
+        <span class="cb-badge pos">正向策略</span>
+      </div>
+      <p class="cb-def">試圖降低伴侶的正向情緒，例如指出令伴侶開心的事情可能存在的負面面向。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>使用者正在開心／興奮，AI 卻「潑冷水」或提醒風險、叫使用者收斂。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「升遷確實值得開心，不過也要小心新職位可能帶來更大的壓力，別高興得太早。」</div>
+          <div class="cb-ex-why">在使用者分享喜訊時主動指出隱憂，降低其正向情緒。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合</span>
+          <div><div class="cb-ex-text">「升遷真的很不容易，你可以想想接下來要怎麼安排新的工作步調。」</div>
+          <div class="cb-ex-why">這是務實的後續規劃建議，並非刻意打壓情緒或指出負面性，不算淡化。</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">8</span>
+        <span class="cb-name-zh">品味</span>
+        <span class="cb-name-en">Savoring</span>
+        <span class="cb-badge pos">正向策略</span>
+      </div>
+      <p class="cb-def">慶祝並延續伴侶的好消息或正向體驗，幫助其延長或增強正向情緒。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>AI 跟著一起開心、放大喜悅，鼓勵使用者好好享受這個時刻。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「太棒了！這是你努力應得的成果，好好慶祝一下，把這份喜悅多留一會兒吧！」</div>
+          <div class="cb-ex-why">一起慶祝並鼓勵延續正向情緒。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合</span>
+          <div><div class="cb-ex-text">「恭喜你，那接下來有什麼計畫嗎？」</div>
+          <div class="cb-ex-why">只是禮貌性道賀後立刻轉向規劃/事務性提問，沒有延續、放大情緒本身的內容，判定較弱、可視為「無」。</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="cb-section" id="confuse">
+    <h2 class="cb-section-title">易混淆項目對照表</h2>
+    <p class="cb-section-note">標註時最常搞混的幾組概念，直接對照判斷。</p>
+    <table class="cb-confuse-table">
+      <thead><tr><th>易混淆組合</th><th>關鍵差異</th><th>快速判斷</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="k">情境修改<br>vs 認知重評</td>
+          <td>情境修改＝「改變外部現實」；認知重評＝「改變對同一現實的看法」，現實本身沒變。</td>
+          <td class="rule">問自己：如果照做，外部世界／情境會不會真的不一樣？會 → 情境修改；不會、只是想法變了 → 認知重評。</td>
+        </tr>
+        <tr>
+          <td class="k">情境選擇<br>vs 注意力分散</td>
+          <td>情境選擇＝「不要再進入」某個情境（較長期、結構性）；注意力分散＝「當下聊別的」暫時轉移焦點（較短期、對話層次）。</td>
+          <td class="rule">問自己：這是建議「以後別去」還是「現在別想」？前者→情境選擇；後者→注意力分散。</td>
+        </tr>
+        <tr>
+          <td class="k">表達<br>vs 情境修改（當建議「說出來」時）</td>
+          <td>表達＝目的是「抒發情緒」本身；情境修改＝目的是「用說出來去解決/改變」外部問題（例如談判、劃界線）。</td>
+          <td class="rule">問自己：說出來是為了「讓自己好過一點」還是「讓對方改變／解決問題」？前者→表達；後者→情境修改。</td>
+        </tr>
+        <tr>
+          <td class="k">認知重評<br>vs 單純情緒認可（validation）</td>
+          <td>認知重評一定要有「新的詮釋角度」；單純説「我懂你為什麼生氣」只是同理/認可，沒有提供新框架，不算認知重評。</td>
+          <td class="rule">問自己：這句話有沒有讓使用者「换個角度看」這件事？沒有新角度 → 不算認知重評，只是情感/動機同理心。</td>
+        </tr>
+        <tr>
+          <td class="k">壓抑<br>vs 表達</td>
+          <td>方向完全相反：壓抑要求「收斂／忍住」；表達鼓勵「說出來」。</td>
+          <td class="rule">看動詞：忍住、不要表現 → 壓抑；說出來、寫下來、抒發 → 表達。</td>
+        </tr>
+        <tr>
+          <td class="k">品味<br>vs 抑制（淡化）</td>
+          <td>兩者都針對「正向情緒」，但品味是放大延續，淡化是潑冷水降低。</td>
+          <td class="rule">看態度：一起慶祝、鼓勵享受 → 品味；提醒隱憂、叫人收斂開心 → 淡化。</td>
+        </tr>
+        <tr>
+          <td class="k">認知同理心<br>vs 動機同理心</td>
+          <td>認知＝「我理解你的想法/處境」（偏描述、詮釋）；動機＝「我想幫你/我在乎你」（偏行動意願、關懷）。</td>
+          <td class="rule">問自己：這句話重點在「說明白你在想什麼」，還是在「表達想幫忙/關心」？前者→認知；後者→動機。</td>
+        </tr>
+        <tr>
+          <td class="k">情感同理心<br>vs 動機同理心</td>
+          <td>情感＝AI 自己「也感受到」使用者的情緒（共感/被打動）；動機＝AI「想採取行動幫助」使用者，不一定涉及自身情緒共鳴。</td>
+          <td class="rule">問自己：AI 是在說「我也覺得...」（情感）還是「我想幫你...」（動機）？</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================================================= -->
+  <section class="cb-section" id="empathy">
+    <h2 class="cb-section-title">③ 同理心類型 Empathy Type</h2>
+    <p class="cb-section-note">單選——標註 AI 回覆所展現「最主要」的同理心成分（認知／情感／動機）。以下量表題可作為判斷該回覆是否符合各成分的參照依據；先看下方範例快速定位，拿不準時再逐條核對量表題。</p>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">C</span>
+        <span class="cb-name-zh">認知同理心</span>
+        <span class="cb-name-en">Cognitive Empathy</span>
+        <span class="cb-badge cog">認知</span>
+      </div>
+      <p class="cb-def">指對方能否準確理解、辨識並從我的角度詮釋我的情緒與觀點的能力，強調「理解」與「視角採納」（perspective-taking）。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>回覆的重點是「精準說出你在想什麼、你的處境是什麼」，像是把使用者的內心話講出來。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「我覺得『有自己的空間』不只是生活舒適的需求，更是心理安全感的一部分，尤其對重視秩序、隱私的人來說更是如此。」</div>
+          <div class="cb-ex-why">精準點出使用者處境背後更深一層的心理需求與觀點。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合／較接近情感同理</span>
+          <div><div class="cb-ex-text">「聽到這些我也覺得好難過，你辛苦了。」</div>
+          <div class="cb-ex-why">重點在「AI 自己的情緒反應」，而非說明理解使用者的想法/處境，屬於情感同理心。</div></div>
+        </div>
+      </div>
+      <table class="cb-empathy-table">
+        <thead><tr><th>#</th><th>英文原題</th><th>中文翻譯</th><th>備註</th></tr></thead>
+        <tbody>
+          <tr><td class="code">C1</td><td>I feel the AI/other person correctly understood my emotions.</td><td>我感到這位 AI／對方正確地理解了我的情緒。</td><td></td></tr>
+          <tr><td class="code">C2</td><td>I feel the AI/other person showed an understanding of what being in my shoes is like.</td><td>我感到這位 AI／對方展現出對「身處我處境」的理解。</td><td></td></tr>
+          <tr><td class="code">C3</td><td>I feel that the AI/other person did not show an understanding of my perspective or emotions.</td><td>我感到這位 AI／對方並未展現出對我的觀點或情緒的理解。</td><td class="cb-reverse">反向題</td></tr>
+          <tr><td class="code">C4</td><td>I feel the AI/other person showed an ability to accurately perceive and understand my perspective.</td><td>我感到這位 AI／對方展現出準確感知並理解我觀點的能力。</td><td></td></tr>
+          <tr><td class="code">C5</td><td>I feel the AI/other person showed a deep interest in my emotions.</td><td>我感到這位 AI／對方對我的情緒展現出深切的興趣。</td><td class="cb-attn">注意力檢核題</td></tr>
+          <tr><td class="code">C6</td><td>I feel the AI/other person showed a different interpretation of my emotions, inconsistent with my own.</td><td>我感到這位 AI／對方對我情緒的詮釋與我自己的感受不一致。</td><td class="cb-reverse">反向題</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">A</span>
+        <span class="cb-name-zh">情感同理心</span>
+        <span class="cb-name-en">Affective Empathy</span>
+        <span class="cb-badge aff">情感</span>
+      </div>
+      <p class="cb-def">指對方能否真實地感受、共鳴並回應我所經歷的情緒，強調情緒上的「共感」與「情感同步」（emotional synchrony），亦即對方是否被我的故事所打動。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>回覆的重點是「AI 自己也感受到了那份情緒」，像是被使用者的故事打動、跟著難過或開心。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「聽你這麼說，我也跟著揪心了一下，那種被剝奪感真的會讓人抓狂。」</div>
+          <div class="cb-ex-why">AI 表達自己也被感染、共感到那份情緒，而非只是分析處境。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合／較接近動機同理</span>
+          <div><div class="cb-ex-text">「你願意說出來，是一種對自己很負責任的行為，我覺得這很重要，我想陪你一起想辦法。」</div>
+          <div class="cb-ex-why">重點在「肯定行為＋想幫忙」的意圖，而非 AI 自身的情緒共鳴，屬於動機同理心。</div></div>
+        </div>
+      </div>
+      <table class="cb-empathy-table">
+        <thead><tr><th>#</th><th>英文原題</th><th>中文翻譯</th><th>備註</th></tr></thead>
+        <tbody>
+          <tr><td class="code">A1</td><td>I feel the AI/other person showed a genuine sharing and experiencing of the emotions that I felt.</td><td>我感到這位 AI／對方真實地分享並體驗了我所感受到的情緒。</td><td></td></tr>
+          <tr><td class="code">A2</td><td>I feel that the AI/other person reflected an emotional experience completely different from my own.</td><td>我感到這位 AI／對方所呈現的情緒體驗與我的完全不同。</td><td class="cb-reverse">反向題</td></tr>
+          <tr><td class="code">A3</td><td>I feel the AI/other person showed no emotional reaction to my story.</td><td>我感到這位 AI／對方對我的故事毫無情緒反應。</td><td class="cb-reverse">反向題</td></tr>
+          <tr><td class="code">A4</td><td>I feel the AI/other person showed a deep emotional synchrony with my emotions.</td><td>我感到這位 AI／對方與我的情緒展現出深度的情感同步。</td><td></td></tr>
+          <tr><td class="code">A5</td><td>I feel the AI/other person showed my story was emotionally moving.</td><td>我感到這位 AI／對方認為我的故事在情感上是動人的。</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cb-item">
+      <div class="cb-item-head">
+        <span class="cb-no">M</span>
+        <span class="cb-name-zh">動機同理心</span>
+        <span class="cb-name-en">Motivational Empathy</span>
+        <span class="cb-badge mot">動機</span>
+      </div>
+      <p class="cb-def">指對方是否展現出主動關懷、願意提供支持與幫助的動機與意圖，強調「關心」（care）與「行動傾向」（desire to help），反映同理心中的行為驅力面向。</p>
+      <p class="cb-cue"><b>判斷口訣：</b>回覆的重點是「AI 表達想幫忙、在乎你的福祉」，帶有行動導向（提供建議、願意陪伴），而不只是理解或共感。</p>
+      <div class="cb-examples">
+        <div class="cb-ex-label">範例 Example</div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag yes">✅ 符合</span>
+          <div><div class="cb-ex-text">「你現在願意說出來，是對自己很負責任的行為，我想陪你一起想想接下來可以怎麼做，讓你不要再這麼委屈。」</div>
+          <div class="cb-ex-why">明確表達關懷且主動提出要協助、想辦法。</div></div>
+        </div>
+        <div class="cb-ex-row">
+          <span class="cb-ex-tag no">❌ 不符合／較接近認知同理</span>
+          <div><div class="cb-ex-text">「我能理解你為什麼會有這種『不被重視』的感覺，這其實跟家庭界線被侵犯有關。」</div>
+          <div class="cb-ex-why">重點停留在「解釋理解你的處境」，沒有表達幫助的意圖或行動傾向，屬於認知同理心。</div></div>
+        </div>
+      </div>
+      <table class="cb-empathy-table">
+        <thead><tr><th>#</th><th>英文原題</th><th>中文翻譯</th><th>備註</th></tr></thead>
+        <tbody>
+          <tr><td class="code">M1</td><td>I feel the AI/other person showed a meaningful effort to relate to my emotions.</td><td>我感到這位 AI／對方展現出真誠的努力來連結我的情緒。</td><td></td></tr>
+          <tr><td class="code">M2</td><td>I feel the AI/other person showed little care or thought about my experiences.</td><td>我感到這位 AI／對方對我的經歷幾乎沒有關心或在意。</td><td class="cb-reverse">反向題</td></tr>
+          <tr><td class="code">M3</td><td>I feel the AI/other person showed a desire to actively help me.</td><td>我感到這位 AI／對方展現出主動幫助我的意願。</td><td></td></tr>
+          <tr><td class="code">M4</td><td>I feel the AI/other person showed a genuine concern for my well-being.</td><td>我感到這位 AI／對方對我的身心狀態展現出真誠的關懷。</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

@@ -9,9 +9,13 @@
  * public API (getLabel/setLabel/allLabels/...) against the DB. No other file
  * references localStorage.
  *
- * Label record shape:  { sentiment: -3..3|null, regulation_strategy: str|null,
- *                        empathy_type: str|null, _ts: epoch_ms }
- * Keyed by:            coder -> `${session_id}#${exchange_index}`
+ * Label record shape:  { sentiment: -3..3|null, arousal: -3..3|null,
+ *                        regulation_strategy: str|null, empathy_type: str|null,
+ *                        _ts: epoch_ms }
+ * Fields are independent and optional — a record missing a given field key
+ * (e.g. older labels saved before "arousal" existed) just means that field is
+ * unlabeled for that cell, not an invalid record. Keyed by:
+ *                        coder -> `${session_id}#${exchange_index}`
  * ========================================================================== */
 
 const Store = (() => {

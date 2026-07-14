@@ -44,12 +44,14 @@ const AIEngine = (() => {
           lines.push(`    "${o.value}" = ${o.label}: ${o.def}`);
       }
     }
-    const stratField = SCHEME.field_by_key.regulation_strategy;
-    const stratExample = stratField && stratField.multi ? '["cognitive_change","response_modulation"]' : '"cognitive_change"';
+    const fieldTemplate = SCHEME.fields.map((f) => {
+      if (f.type === "likert") return `"${f.key}":<int|null>`;
+      if (f.multi) return `"${f.key}":["<value>", ...]|null`;
+      return `"${f.key}":"<value>"|null`;
+    }).join(",");
     lines.push("",
       "Return ONLY a JSON object of the form:",
-      '{"labels":[{"index":<int>,"sentiment":<int|null>,' +
-      `"regulation_strategy":${stratExample}|null,"empathy_type":"<value|null>"}, ...]}`,
+      `{"labels":[{"index":<int>,${fieldTemplate}}, ...]}`,
       "One entry per exchange index provided. Use null (or [] for multi-select fields)",
       "when a field does not apply (e.g. sentiment when the user did not speak; " +
       "strategy/empathy when the AI reply is a bare greeting). Output no prose, no code fences.");
@@ -119,15 +121,15 @@ const AIEngine = (() => {
 
   function coerce(entry) {
     const out = {};
-    const sA = allowed("sentiment");
-    let s = entry.sentiment;
-    if (s === null || s === undefined || s === "") out.sentiment = null;
-    else { s = Math.round(+s); out.sentiment = (isFinite(s) && s >= sA.min && s <= sA.max) ? s : null; }
-    for (const key of ["regulation_strategy", "empathy_type"]) {
-      const field = SCHEME.field_by_key[key];
+    for (const field of SCHEME.fields) {
+      const key = field.key;
       const a = allowed(key);
       const v = entry[key];
-      if (field.multi) {
+      if (field.type === "likert") {
+        if (v === null || v === undefined || v === "") { out[key] = null; continue; }
+        const n = Math.round(+v);
+        out[key] = (isFinite(n) && n >= a.min && n <= a.max) ? n : null;
+      } else if (field.multi) {
         const arr = Array.isArray(v) ? v : (v ? [v] : []);
         const clean = [...new Set(arr.filter((x) => a.values.includes(x)))];
         out[key] = clean.length ? clean : null;

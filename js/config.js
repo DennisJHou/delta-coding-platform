@@ -21,18 +21,22 @@ window.CODING_SCHEME = {
   rating_unit: "exchange",
 
   fields: [
-    /* ---- USER SIDE : Sentiment (7-point signed Likert) -------------------- */
+    /* ---- USER SIDE : Valence (7-point signed Likert) ----------------------
+     * key stays "sentiment" for backward compatibility with labels already
+     * saved under this key (e.g. coders who annotated before the "arousal"
+     * dimension existed) — only the display label was clarified to "valence"
+     * now that a second user-side dimension exists alongside it. */
     {
       key: "sentiment",
-      label: "使用者情緒",
-      short: "情緒",
+      label: "使用者情緒效價",
+      short: "效價",
       side: "user",
       type: "likert",
       min: -3, max: 3,
       metric: "weighted_kappa",           // + Pearson r reported alongside
       na_when_empty: true,                 // opening bot greeting has no user text
       definition:
-        "此句使用者情緒的強度與正負向，範圍從極度負面 (-3)、中性 (0)，到極度正面 (+3)。",
+        "此句使用者情緒的效價（valence）強度與正負向，範圍從極度負面 (-3)、中性 (0)，到極度正面 (+3)。",
       anchors: {
         "-3": "極度負面 Extremely negative",
         "-2": "偏負面 Quite negative",
@@ -41,6 +45,33 @@ window.CODING_SCHEME = {
         "1":  "略正面 Slightly positive",
         "2":  "偏正面 Quite positive",
         "3":  "極度正面 Extremely positive",
+      },
+    },
+
+    /* ---- USER SIDE : Arousal (7-point signed Likert) ----------------------
+     * Same rating unit and range as valence (side:"user", -3..+3), but a
+     * separate independent dimension — a coder may have valence but not yet
+     * have arousal labeled (or vice versa) for the same cell; that's treated
+     * as "not yet labeled" for arousal specifically, not an error. */
+    {
+      key: "arousal",
+      label: "使用者情緒喚醒度",
+      short: "喚醒度",
+      side: "user",
+      type: "likert",
+      min: -3, max: 3,
+      metric: "weighted_kappa",           // + Pearson r reported alongside
+      na_when_empty: true,                 // opening bot greeting has no user text
+      definition:
+        "此句使用者情緒的喚醒（激動）程度，範圍從極度平靜／低落 (-3)、中等喚醒 (0)，到極度激動／亢奮 (+3)。",
+      anchors: {
+        "-3": "極度平靜 Extremely calm / deactivated",
+        "-2": "偏平靜 Quite calm",
+        "-1": "略平靜 Slightly calm",
+        "0":  "中等喚醒 Moderate arousal",
+        "1":  "略激動 Slightly aroused",
+        "2":  "偏激動 Quite aroused",
+        "3":  "極度激動 Extremely aroused / activated",
       },
     },
 

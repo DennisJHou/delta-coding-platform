@@ -15,7 +15,11 @@ password is entered (see **Deploy to GitHub Pages** below).
 ## What it does
 
 1. **Code** — dialogues shown as chat cards; each exchange gets:
-   - **User Sentiment** — 7-point signed Likert, −3…+3
+   - **User Valence** (`sentiment` key, kept for backward compatibility with
+     existing labels) — 7-point signed Likert, −3…+3
+   - **User Arousal** — 7-point signed Likert, −3…+3, independent of valence.
+     Coders who labeled before this field existed (or upload a partial export)
+     simply show as "not yet labeled" for arousal on those cells — no error.
    - **AI Emotion-Regulation Strategy** — Gross's process model
      (situation selection / modification, attentional deployment, cognitive
      change, response modulation, suppression) + positive-affect (savoring /
@@ -27,7 +31,8 @@ password is entered (see **Deploy to GitHub Pages** below).
    coding scheme, including the multi-select instruction) and stores its labels
    as a third rater.
 3. **Analytics** — inter-rater agreement for every rater pair:
-   - Sentiment: quadratic-weighted κ + Pearson r
+   - Valence and Arousal: quadratic-weighted κ + Pearson r (each scored
+     independently, using only the cells both raters actually labeled)
    - Empathy Type (single-select categorical): Cohen's κ
    - Regulation Strategy (multi-select): mean per-category binary κ (κ̄) +
      Jaccard set-overlap similarity + exact-set agreement

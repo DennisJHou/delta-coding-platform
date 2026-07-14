@@ -39,7 +39,10 @@ const App = (() => {
         el("div", [el("div.title", { text: "人機對話標註平台" }),
           el("div.subtitle", { text: CODING_SCHEME.version })])]),
       tabsEl,
-      el("div.coder-box", [el("label", { text: "標註身份" }), coderSel]),
+      el("div.coder-box", [
+        el("a.btn.small", { href: "codebook.html", target: "_blank",
+          style: "text-decoration:none;margin-right:6px;", text: "📖 Codebook" }),
+        el("label", { text: "標註身份" }), coderSel]),
     ]);
   }
 
