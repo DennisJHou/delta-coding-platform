@@ -100,6 +100,8 @@ body[data-coder=ai] .badge-coder { background: #f2ddc4; color: var(--ai); }
 
 .controls { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
 .field { flex: 1 1 240px; min-width: 220px; }
+.field-group.side-user { flex: 1 1 240px; min-width: 220px; display: flex; flex-direction: column; gap: 14px; }
+.field-group.side-user .field { flex: none; min-width: 0; }
 .field-label { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 12px; margin-bottom: 6px; cursor: help; }
 .side-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 999px; background: var(--line2); color: var(--muted); }
 .field.side-user .side-tag { background: #f7e3c8; color: var(--a); }

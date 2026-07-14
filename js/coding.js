@@ -134,8 +134,7 @@ const Coding = (() => {
         el("div.msg", { text: ex.bot_text }),
       ]));
 
-    const controls = el("div.controls");
-    for (const f of SCHEME.fields) {
+    const fieldBox = (f) => {
       const box = el("div.field.side-" + f.side);
       box.appendChild(el("label.field-label", { title: f.definition }, [
         f.label, el("span.side-tag", { text: f.side === "user" ? "使用者" : "AI" }) ]));
@@ -144,8 +143,20 @@ const Coding = (() => {
       } else {
         box.appendChild(fieldControl(f, dialogue.session_id, ex.index, rec, card, onChange));
       }
-      controls.appendChild(box);
+      return box;
+    };
+
+    // User-side fields (valence, arousal, ...) stack vertically in one
+    // column instead of each claiming its own flex slot, since they rate
+    // the same utterance and read more naturally grouped together.
+    const controls = el("div.controls");
+    const userFields = SCHEME.fields.filter((f) => f.side === "user");
+    const otherFields = SCHEME.fields.filter((f) => f.side !== "user");
+    if (userFields.length) {
+      const userStack = el("div.field-group.side-user", userFields.map(fieldBox));
+      controls.appendChild(userStack);
     }
+    for (const f of otherFields) controls.appendChild(fieldBox(f));
     card.appendChild(controls);
     return card;
   }
