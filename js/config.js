@@ -82,12 +82,11 @@ window.CODING_SCHEME = {
       short: "策略",
       side: "bot",
       type: "categorical",
-      multi: true,              // 一則回覆可能同時做好幾件事（例如同時安撫又重新框架）
-      metric: "multi_label_kappa",
+      multi: false,
+      metric: "cohens_kappa",
       definition:
         "AI 回覆所使用的情緒調節策略，依據 Gross 的情緒調節歷程模型（情境 → 注意力 → " +
-        "評估 → 反應），加上正向情緒的調節策略。請勾選所有明顯符合的策略——大多數回覆是" +
-        "1 個，少數會有 2-3 個。",
+        "評估 → 反應），加上正向情緒的調節策略。請選擇最主要、最明顯符合的單一策略。",
       groups: [
         {
           name: "負向情緒策略（Gross）",
